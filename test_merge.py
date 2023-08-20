@@ -13,6 +13,7 @@ import highway_env
 
 import argparse
 from Ptime import Ptime
+import MyEnv
 
 # ==================================
 #        Main script
@@ -24,23 +25,18 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     train = True
+    GrayScale_env = gym.make("my-merge-v0", render_mode = "human")
+    
     if train:
         n_cpu = 8
         batch_size = 64
-        env = gym.make("merge-v0")
-        env.configure({"observation": {
-                       "type": "GrayscaleObservation",
-                       "observation_shape": (128, 64),
-                       "stack_size": 4,
-                       "weights": [0.2989, 0.5870, 0.1140],  # weights for RGB conversion
-                       "scaling": 1.75,
-                   }})
-        env.reset()
+        tensorboard_log="merge_ppo/"
+        trained_env = GrayScale_env
         #trained_env = make_vec_env(env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
         #env = gym.make("highway-fast-v0", render_mode="human")
         model = PPO("CnnPolicy",
-                    env,
-                    policy_kwargs=dict(net_arch=[dict(pi=[256, 256], vf=[256, 256])]),
+                    trained_env,
+                    policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256])),
                     n_steps=batch_size * 16 // n_cpu,
                     batch_size=batch_size,
                     n_epochs=10,
@@ -48,18 +44,19 @@ if __name__ == "__main__":
                     gamma=0.8,
                     verbose=1,
                     target_kl=0.04,
-                    ent_coef=0.05,
-                    tensorboard_log="highway_ppo/")
+                    ent_coef=0.1,
+                    tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()
         log_name = time_str.get_time() + f"_{args.log_name}"
         # Train the agent
         model.learn(total_timesteps=int(2e4), tb_log_name=log_name)
+        print("log name: ", tensorboard_log + log_name)
         # Save the agent
-        model.save("highway_ppo/model")
+        model.save(tensorboard_log + "model")
 
-    model = PPO.load("highway_ppo/model")
-    env.render_mode = "human"
+    model = PPO.load(tensorboard_log + "model")
+    env = GrayScale_env
     while True:
         obs, info = env.reset()
         done = truncated = False

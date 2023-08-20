@@ -39,11 +39,12 @@ if __name__ == "__main__":
         batch_size = 64
         tensorboard_log="highway_ppo/"
         trained_env = GrayScale_env
+        print(trained_env.config)
         #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
         #env = gym.make("highway-fast-v0", render_mode="human")
         model = PPO("CnnPolicy",
                     trained_env,
-                    policy_kwargs=dict(net_arch=[dict(pi=[256, 256], vf=[256, 256])]),
+                    policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256])),
                     n_steps=batch_size * 16 // n_cpu,
                     batch_size=batch_size,
                     n_epochs=10,
@@ -60,9 +61,9 @@ if __name__ == "__main__":
         model.learn(total_timesteps=int(5e5), tb_log_name=log_name)
         print("log name: ", tensorboard_log + log_name)
         # Save the agent
-        model.save("highway_ppo/model")
+        model.save(tensorboard_log + "model")
 
-    model = PPO.load("highway_ppo/model")
+    model = PPO.load(tensorboard_log + "model")
     env = GrayScale_env
     while True:
         obs, info = env.reset()
