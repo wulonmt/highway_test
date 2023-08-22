@@ -15,10 +15,6 @@ import argparse
 from Ptime import Ptime
 import MyEnv
 
-# ==================================
-#        Main script
-# ==================================
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-l", "--log_name", help="modified log name", type=str, nargs='?')
 args = parser.parse_args()
