@@ -14,6 +14,7 @@ import highway_env
 import argparse
 from Ptime import Ptime
 import MyEnv
+from gymnasium.wrappers import RecordVideo
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-l", "--log_name", help="modified log name", type=str, nargs='?')
@@ -39,9 +40,9 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.1,
+                    target_kl=0.2,
                     ent_coef=0.01,
-                    vf_coef=0.8,
+                    vf_coef=1.222,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()
@@ -54,6 +55,20 @@ if __name__ == "__main__":
 
     model = PPO.load(tensorboard_log + "model")
     env = GrayScale_env
+    record_env = RecordVideo(env, video_folder=tensorboard_log + log_name + "/videos", episode_trigger=lambda e: True)
+    record_env.unwrapped.set_record_video_wrapper(record_env)
+    
+    for video in rage(10):
+        done = truncated = False
+        obs, info = record_env.reset()
+        while not (done or truncated):
+            # Predict
+            action, _states = model.predict(obs, deterministic=True)
+            # Get reward
+            obs, reward, done, truncated, info = env.step(action)
+            # Render
+            env.render()
+    record_env.close()
     while True:
         obs, info = env.reset()
         done = truncated = False
