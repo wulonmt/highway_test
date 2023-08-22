@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     train = True
-    GrayScale_env = gym.make("my-merge-v0", render_mode = "human")
+    GrayScale_env = gym.make("my-merge-v0", render_mode = "rgb_array")
     
     if train:
         n_cpu = 8
@@ -39,14 +39,15 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.04,
-                    ent_coef=0.1,
+                    target_kl=0.1,
+                    ent_coef=0.01,
+                    vf_coef=0.8,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()
         log_name = time_str.get_time() + f"_{args.log_name}"
         # Train the agent
-        model.learn(total_timesteps=int(2e4), tb_log_name=log_name)
+        model.learn(total_timesteps=int(5e5), tb_log_name=log_name)
         print("log name: ", tensorboard_log + log_name)
         # Save the agent
         model.save(tensorboard_log + "model")
