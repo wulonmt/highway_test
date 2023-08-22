@@ -39,9 +39,9 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.1,
+                    target_kl=0.2,
                     ent_coef=0.01,
-                    vf_coef=0.8,
+                    vf_coef=1.2,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()
