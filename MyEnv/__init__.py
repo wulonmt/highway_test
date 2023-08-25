@@ -15,3 +15,7 @@ register(
 register(
     id = 'test-racetrack-v0',
     entry_point = 'MyEnv.envs:testRacetrackEnv')
+    
+register(
+    id = 'my-intersection-v0',
+    entry_point = 'MyEnv.envs:MyIntersectionEnv')
