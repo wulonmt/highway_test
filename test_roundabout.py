@@ -14,7 +14,6 @@ import highway_env
 import argparse
 from Ptime import Ptime
 import MyEnv
-from gymnasium.wrappers import RecordVideo
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-l", "--log_name", help="modified log name", type=str, nargs='?')
@@ -22,14 +21,15 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     train = True
-    GrayScale_env = gym.make("my-merge-v0", render_mode = "rgb_array")
+    GrayScale_env = gym.make("roundabout-v0", render_mode="rgb_array")
     
     if train:
         n_cpu = 8
         batch_size = 64
-        tensorboard_log="merge_ppo/"
+        tensorboard_log="roundabout_ppo/"
         trained_env = GrayScale_env
-        #trained_env = make_vec_env(env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
+        #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
+        #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu,)
         #env = gym.make("highway-fast-v0", render_mode="human")
         model = PPO("CnnPolicy",
                     trained_env,
@@ -40,9 +40,9 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.2,
-                    ent_coef=0.01,
-                    vf_coef=1.2,
+                    target_kl=0.1,
+                    ent_coef=0.05,
+                    vf_coef=0.8,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()
@@ -55,20 +55,6 @@ if __name__ == "__main__":
 
     model = PPO.load(tensorboard_log + "model")
     env = GrayScale_env
-    record_env = RecordVideo(env, video_folder=tensorboard_log + log_name + "/videos", episode_trigger=lambda e: True)
-    record_env.unwrapped.set_record_video_wrapper(record_env)
-    
-    for video in range(10):
-        done = truncated = False
-        obs, info = record_env.reset()
-        while not (done or truncated):
-            # Predict
-            action, _states = model.predict(obs, deterministic=True)
-            # Get reward
-            obs, reward, done, truncated, info = env.step(action)
-            # Render
-            env.render()
-    record_env.close()
     while True:
         obs, info = env.reset()
         done = truncated = False
