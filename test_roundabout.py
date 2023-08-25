@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     train = True
-    GrayScale_env = gym.make("roundabout-v0", render_mode="rgb_array")
+    GrayScale_env = gym.make("my-roundabout-v0", render_mode="rgb_array")
     
     if train:
         n_cpu = 8
@@ -40,8 +40,8 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.1,
-                    ent_coef=0.05,
+                    target_kl=0.2,
+                    ent_coef=0.1,
                     vf_coef=0.8,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()

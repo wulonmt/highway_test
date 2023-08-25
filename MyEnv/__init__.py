@@ -16,6 +16,7 @@ register(
     id = 'my-roundabout-v0',
     entry_point = 'MyEnv.envs:MyRoundaboutEnv')
 
+register(
     id = 'test-racetrack-v0',
     entry_point = 'MyEnv.envs:testRacetrackEnv')
     
