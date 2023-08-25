@@ -2,7 +2,8 @@ import gymnasium as gym
 from matplotlib import pyplot as plt
 import MyEnv
 
-env = gym.make('custom-racetrack-v0', render_mode='rgb_array')
+#env = gym.make('custom-racetrack-v0', render_mode='rgb_array')
+env = gym.make('test-racetrack-v0', render_mode='rgb_array')
 env.reset()
 """
 for _ in range(3):
