@@ -13,10 +13,7 @@ import highway_env
 
 import argparse
 from Ptime import Ptime
-
-# ==================================
-#        Main script
-# ==================================
+import MyEnv
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-l", "--log_name", help="modified log name", type=str, nargs='?')
@@ -24,15 +21,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     train = True
-    GrayScale_env = gym.make("racetrack-v0", render_mode = "rgb_array")
-    GrayScale_env.configure({"observation": {
-                       "type": "GrayscaleObservation",
-                       "observation_shape": (128, 64),
-                       "stack_size": 4,
-                       "weights": [0.2989, 0.5870, 0.1140],  # weights for RGB conversion
-                       "scaling": 1.75,
-                   }})
-    GrayScale_env.reset()
+    GrayScale_env = gym.make("my-racetrack-v0", render_mode = "rgb_array")
     
     if train:
         n_cpu = 8
@@ -50,8 +39,9 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.04,
+                    target_kl=0.2,
                     ent_coef=0.1,
+                    vf_coef=0.8,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
         time_str.set_time_now()

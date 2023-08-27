@@ -9,8 +9,8 @@ register(
     entry_point = 'MyEnv.envs:MyHighwayEnv')
     
 register(
-    id = 'custom-racetrack-v0',
-    entry_point = 'MyEnv.envs:CustomRacetrackEnv')
+    id = 'my-racetrack-v0',
+    entry_point = 'MyEnv.envs:MyRacetrackEnv')
     
 register(
     id = 'my-roundabout-v0',
