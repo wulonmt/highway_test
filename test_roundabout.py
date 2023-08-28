@@ -14,6 +14,7 @@ import highway_env
 import argparse
 from Ptime import Ptime
 import MyEnv
+from CustomPPO import CustomPPO
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-l", "--log_name", help="modified log name", type=str, nargs='?')
@@ -31,7 +32,7 @@ if __name__ == "__main__":
         #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
         #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu,)
         #env = gym.make("highway-fast-v0", render_mode="human")
-        model = PPO("CnnPolicy",
+        model = CustomPPO("CnnPolicy",
                     trained_env,
                     policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256])),
                     n_steps=batch_size * 16 // n_cpu,
@@ -41,7 +42,7 @@ if __name__ == "__main__":
                     gamma=0.8,
                     verbose=1,
                     target_kl=0.2,
-                    ent_coef=0.1,
+                    ent_coef=0.03,
                     vf_coef=0.8,
                     tensorboard_log=tensorboard_log)
         time_str = Ptime()
