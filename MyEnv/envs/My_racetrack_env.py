@@ -10,6 +10,7 @@ from highway_env.vehicle.controller import ControlledVehicle
 from highway_env.vehicle.objects import Obstacle
 from highway_env.vehicle.behavior import IDMVehicle
 from highway_env.vehicle.kinematics import Vehicle
+from highway_env.vehicle.controller import MDPVehicle
 
 class MyRacetrackEnv(RacetrackEnv):
     @classmethod
@@ -18,23 +19,24 @@ class MyRacetrackEnv(RacetrackEnv):
         cfg.update(
             {"observation": {
                        "type": "GrayscaleObservation",
-                       "observation_shape": (128, 64),
+                       "observation_shape": (84, 84),
                        "stack_size": 4,
-                       "weights": [0.2989, 0.5870, 0.1140],  # weights for RGB conversion
+                       "weights": [0.9, 0.1, 0.5],  # weights for RGB conversion
                        "scaling": 1.75,
                    },
             "action": {
                 "type": "DiscreteMetaAction",
+                "target_speeds": [0, 8, 16],
                         },
-            "collision_reward": -1,
-            "right_lane_reward": 0.1,
+            "collision_reward": -5,
+            "right_lane_reward": 0,
             "high_speed_reward": 0.4,
             "merging_speed_reward": -0.5,
             "lane_change_reward": 0,
             "screen_width": 1000,
             "screen_height": 1000,
             "other_vehicles": 4,
-            "duration": 10,
+            "duration": 50,
             })
         return cfg
 
@@ -51,7 +53,7 @@ class MyRacetrackEnv(RacetrackEnv):
                 self.road.network.random_lane_index(rng)
             vehicle = Vehicle.create_random(
                 self.road,
-                speed=None,
+                speed=8,
                 lane_from = lane_index[0],
                 lane_to = lane_index[1],
                 lane_id = lane_index[2],
@@ -67,7 +69,7 @@ class MyRacetrackEnv(RacetrackEnv):
                                               low=0,
                                               high=self.road.network.get_lane(("b", "c", 0)).length
                                           ),
-                                          speed=6+rng.uniform(high=3))
+                                          speed=16+rng.normal()*2)
         self.road.vehicles.append(vehicle)
 
         # Other vehicles
@@ -78,10 +80,26 @@ class MyRacetrackEnv(RacetrackEnv):
                                                   low=0,
                                                   high=self.road.network.get_lane(random_lane_index).length
                                               ),
-                                              speed=6+rng.uniform(high=3))
+                                              speed=16+rng.normal()*2)
             # Prevent early collisions
             for v in self.road.vehicles:
                 if np.linalg.norm(vehicle.position - v.position) < 20:
                     break
             else:
                 self.road.vehicles.append(vehicle)
+                
+    def _reward(self, action: np.ndarray) -> float:
+        rewards = self._rewards(action)
+        reward = sum(self.config.get(name, 0) * reward for name, reward in rewards.items())
+        #reward = utils.lmap(reward, [self.config["collision_reward"], self.config["high_speed_reward"]], [0, 1])
+        reward *= rewards["on_road_reward"]
+        #print("reward: ", reward, end='\r')
+        return reward
+
+    def _rewards(self, action: np.ndarray) -> Dict[Text, float]:
+        return {
+            "collision_reward": self.vehicle.crashed,
+            "on_road_reward": self.vehicle.on_road,
+            "high_speed_reward": MDPVehicle.get_speed_index(self.vehicle) / (MDPVehicle.DEFAULT_TARGET_SPEEDS.size - 1),
+        }
+        

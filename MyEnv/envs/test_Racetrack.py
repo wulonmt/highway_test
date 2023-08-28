@@ -18,9 +18,9 @@ class testRacetrackEnv(RacetrackEnv):
         cfg.update(
             {"observation": {
                        "type": "GrayscaleObservation",
-                       "observation_shape": (128, 64),
+                       "observation_shape": (84, 84),
                        "stack_size": 4,
-                       "weights": [0.2989, 0.5870, 0.1140],  # weights for RGB conversion
+                       "weights": [0.9, 0.1, 0.5],  # weights for RGB conversion
                        "scaling": 1.75,
                    },
             "collision_reward": -1,
