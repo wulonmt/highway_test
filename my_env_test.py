@@ -21,12 +21,19 @@ parser.add_argument("-l", "--log_name", help="modified log name", type=str, narg
 parser.add_argument("-s", "--save_log", help="whether save log or not", type=str, default = "True") #parser can't pass bool
 parser.add_argument("-e", "--environment", help="which my- env been used", type=str, required = True)
 parser.add_argument("-t", "--train", help="training or not", type=str, default = "True")
+parser.add_argument("-r", "--render_mode", help="h for human & r for rgb_array", type=str, default = "r")
 args = parser.parse_args()
 ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection",]
 
 if __name__ == "__main__":
     assert args.environment in ENV_LIST, "Wrong my-ENV"
-    GrayScale_env = gym.make(f"my-{args.environment}-v0", render_mode="rgb_array")
+    assert args.render_mode in "hr", "Wrong render mode"
+    
+    if args.render_mode == "r":
+        GrayScale_env = gym.make(f"my-{args.environment}-v0", render_mode="rgb_array")
+    elif args.render_mode == "h":
+        GrayScale_env = gym.make(f"my-{args.environment}-v0", render_mode="human")
+    
     
     if args.train == "True":
         n_cpu = 8
