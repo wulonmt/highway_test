@@ -48,7 +48,8 @@ if __name__ == "__main__":
                     target_kl=0.2,
                     ent_coef=0.03,
                     vf_coef=0.8,
-                    tensorboard_log=tensorboard_log)
+                    tensorboard_log=tensorboard_log,
+                    use_advantage = False)
         time_str = Ptime()
         time_str.set_time_now()
         log_name = time_str.get_time() + f"_{args.log_name}"

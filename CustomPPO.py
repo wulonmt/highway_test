@@ -48,6 +48,7 @@ class CustomPPO(PPO):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
+        use_advantage: bool = True,
     ):
         super().__init__(
             policy=policy,
@@ -75,6 +76,7 @@ class CustomPPO(PPO):
             seed=seed,
             _init_setup_model=_init_setup_model,            
         )
+        self.use_advantage = use_advantage
         
     def train(self) -> None:
         """
@@ -111,18 +113,19 @@ class CustomPPO(PPO):
 
                 values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)
                 values = values.flatten()
+                #use advantages or returns
+                gradient_coefs = rollout_data.advantages if self.use_advantage else rollout_data.returns
                 # Normalize advantage
-                advantages = rollout_data.advantages
                 # Normalization does not make sense if mini batchsize == 1, see GH issue #325
-                if self.normalize_advantage and len(advantages) > 1:
-                    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+                if self.normalize_advantage and len(gradient_coefs) > 1:
+                    gradient_coefs = (gradient_coefs - gradient_coefs.mean()) / (gradient_coefs.std() + 1e-8)
 
                 # ratio between old and new policy, should be one at the first iteration
                 ratio = th.exp(log_prob - rollout_data.old_log_prob)
 
                 # clipped surrogate loss
-                policy_loss_1 = advantages * ratio
-                policy_loss_2 = advantages * th.clamp(ratio, 1 - clip_range, 1 + clip_range)
+                policy_loss_1 = gradient_coefs * ratio
+                policy_loss_2 = gradient_coefs * th.clamp(ratio, 1 - clip_range, 1 + clip_range)
                 policy_loss = -th.min(policy_loss_1, policy_loss_2).mean()
 
                 # Logging
@@ -139,9 +142,10 @@ class CustomPPO(PPO):
                     values_pred = rollout_data.old_values + th.clamp(
                         values - rollout_data.old_values, -clip_range_vf, clip_range_vf
                     )
-                # Value loss using the TD(gae_lambda) target
-                value_loss = F.mse_loss(rollout_data.returns, values_pred)
-                value_losses.append(value_loss.item())
+                if self.use_advantage:
+                    # Value loss using the TD(gae_lambda) target
+                    value_loss = F.mse_loss(rollout_data.returns, values_pred)
+                    value_losses.append(value_loss.item())
 
                 # Entropy loss favor exploration
                 if entropy is None:
@@ -152,7 +156,9 @@ class CustomPPO(PPO):
 
                 entropy_losses.append(entropy_loss.item())
 
-                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+                loss = policy_loss + self.ent_coef * entropy_loss
+                if self.use_advantage:
+                    loss += self.vf_coef * value_loss
 
                 # Calculate approximate form of reverse KL Divergence for early stopping
                 # see issue #417: https://github.com/DLR-RM/stable-baselines3/issues/417
@@ -185,7 +191,8 @@ class CustomPPO(PPO):
         # Logs
         self.logger.record("train/entropy_loss", np.mean(entropy_losses))
         self.logger.record("train/policy_gradient_loss", np.mean(pg_losses))
-        self.logger.record("train/value_loss", np.mean(value_losses))
+        if self.use_advantage:
+            self.logger.record("train/value_loss", np.mean(value_losses))
         self.logger.record("train/approx_kl", np.mean(approx_kl_divs))
         self.logger.record("train/clip_fraction", np.mean(clip_fractions))
         self.logger.record("train/loss", loss.item())
