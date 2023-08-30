@@ -87,6 +87,8 @@ class MyRacetrackEnv(RacetrackEnv):
                     break
             else:
                 self.road.vehicles.append(vehicle)
+        #for takeover
+        self.closing = np.full((len(self.road.vehicles)-1), False)
                 
     def _reward(self, action: np.ndarray) -> float:
         rewards = self._rewards(action)
@@ -94,6 +96,7 @@ class MyRacetrackEnv(RacetrackEnv):
         #reward = utils.lmap(reward, [self.config["collision_reward"], self.config["high_speed_reward"]], [0, 1])
         reward *= rewards["on_road_reward"]
         #print("reward: ", reward, end='\r')
+        self.takeover()
         return reward
 
     def _rewards(self, action: np.ndarray) -> Dict[Text, float]:
@@ -102,4 +105,13 @@ class MyRacetrackEnv(RacetrackEnv):
             "on_road_reward": self.vehicle.on_road,
             "high_speed_reward": MDPVehicle.get_speed_index(self.vehicle) / (MDPVehicle.DEFAULT_TARGET_SPEEDS.size - 1),
         }
+        
+    def takeover(self):
+        ego = self.road.vehicles[0]
+        others = self.road.vehicles[1:]
+        vehicles_distance = []
+        for i, other in enumerate(others):
+            dist = np.linalg.norm(ego.position - other.position)
+            if(dist < 10):
+                print(f"{i} is closing")
         
