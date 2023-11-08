@@ -36,17 +36,17 @@ if __name__ == "__main__":
     
     
     if args.train == "True":
-        n_cpu = 8
+        n_cpu = 6
         batch_size = 64
         tensorboard_log=f"{args.environment}_ppo/" if args.save_log == "True" else None
-        trained_env = GrayScale_env
-        #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
+        #trained_env = GrayScale_env
+        trained_env = make_vec_env(f"my-{args.environment}-v0", n_envs=n_cpu, vec_env_cls=SubprocVecEnv)
         #trained_env = make_vec_env(GrayScale_env, n_envs=n_cpu,)
         #env = gym.make("highway-fast-v0", render_mode="human")
         model = CustomPPO("CnnPolicy",
                     trained_env,
                     policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256])),
-                    n_steps=batch_size * 16 // n_cpu,
+                    n_steps=batch_size * 12 // n_cpu,
                     batch_size=batch_size,
                     n_epochs=10,
                     learning_rate=5e-4,
@@ -60,9 +60,13 @@ if __name__ == "__main__":
         time_str = Ptime()
         time_str.set_time_now()
         log_name = time_str.get_time() + f"_{args.log_name}"
+        start_time = time_str.get_origin_time()
         # Train the agent
-        model.learn(total_timesteps=int(5e5), tb_log_name=log_name)
+        model.learn(total_timesteps=int(1e3), tb_log_name=log_name)
+        time_str.set_time_now()
+        end_time = time_str.get_origin_time()
         print("log name: ", tensorboard_log + log_name)
+        print("total time: ", end_time - start_time)
         # Save the agent
         if args.save_log:
             model.save(tensorboard_log + "model")
