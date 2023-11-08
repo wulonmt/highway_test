@@ -28,7 +28,7 @@ class MyRacetrackEnv(RacetrackEnv):
                 "type": "DiscreteMetaAction",
                 "target_speeds": [0, 8, 16],
                         },
-            "collision_reward": -5,
+            "collision_reward": -1,
             "right_lane_reward": 0,
             "high_speed_reward": 0.4,
             "merging_speed_reward": -0.5,
@@ -37,6 +37,7 @@ class MyRacetrackEnv(RacetrackEnv):
             "screen_height": 1000,
             "other_vehicles": 4,
             "duration": 50,
+            "takeover_reward": 1,
             })
         return cfg
 
@@ -92,11 +93,11 @@ class MyRacetrackEnv(RacetrackEnv):
                 
     def _reward(self, action: np.ndarray) -> float:
         rewards = self._rewards(action)
+        #print("rewards: ", rewards, end = '\r')
         reward = sum(self.config.get(name, 0) * reward for name, reward in rewards.items())
         #reward = utils.lmap(reward, [self.config["collision_reward"], self.config["high_speed_reward"]], [0, 1])
         reward *= rewards["on_road_reward"]
         #print("reward: ", reward, end='\r')
-        self.takeover()
         return reward
 
     def _rewards(self, action: np.ndarray) -> Dict[Text, float]:
@@ -104,14 +105,23 @@ class MyRacetrackEnv(RacetrackEnv):
             "collision_reward": self.vehicle.crashed,
             "on_road_reward": self.vehicle.on_road,
             "high_speed_reward": MDPVehicle.get_speed_index(self.vehicle) / (MDPVehicle.DEFAULT_TARGET_SPEEDS.size - 1),
+            "takeover_reward": self.takeover(),
         }
         
     def takeover(self):
         ego = self.road.vehicles[0]
         others = self.road.vehicles[1:]
-        vehicles_distance = []
+        TK = 0
         for i, other in enumerate(others):
             dist = np.linalg.norm(ego.position - other.position)
-            if(dist < 10):
-                print(f"{i} is closing")
+            if(dist < 10 and ego.speed > other.speed):
+                #print(f"closing {i}, ego speed: {ego.speed}, {i}speed: {other.speed}")
+                self.closing[i] = True
+            elif(self.closing[i] == True):
+                if(ego.speed > other.speed):
+                    TK += 1
+                self.closing[i] = False
+        #print("closing array: ", self.closing, end = '\r')
+        return TK
+            
         

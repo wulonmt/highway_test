@@ -23,3 +23,11 @@ register(
 register(
     id = 'my-intersection-v0',
     entry_point = 'MyEnv.envs:MyIntersectionEnv')
+    
+register(
+    id = 'my-crowded_highway-v0',
+    entry_point = 'MyEnv.envs:MyCrowdedHighwayEnv')
+    
+register(
+    id = 'my-crowded_merge-v0',
+    entry_point = 'MyEnv.envs:MyCrowdedMergeEnv')
