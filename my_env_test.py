@@ -23,7 +23,7 @@ parser.add_argument("-e", "--environment", help="which my- env been used", type=
 parser.add_argument("-t", "--train", help="training or not", type=str, default = "True")
 parser.add_argument("-r", "--render_mode", help="h for human & r for rgb_array", type=str, default = "r")
 args = parser.parse_args()
-ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection",]
+ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection", "crowded_highway", "crowded_merge"]
 
 if __name__ == "__main__":
     assert args.environment in ENV_LIST, "Wrong my-ENV"
@@ -52,11 +52,11 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.2,
-                    ent_coef=0.03,
+                    target_kl=0.1,
+                    ent_coef=0.01,
                     vf_coef=0.8,
                     tensorboard_log=tensorboard_log,
-                    use_advantage = False)
+                    use_advantage = True)
         time_str = Ptime()
         time_str.set_time_now()
         log_name = time_str.get_time() + f"_{args.log_name}"
