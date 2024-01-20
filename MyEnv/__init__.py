@@ -31,3 +31,11 @@ register(
 register(
     id = 'my-crowded_merge-v0',
     entry_point = 'MyEnv.envs:MyCrowdedMergeEnv')
+    
+register(
+    id = 'my-merge_hard-v0',
+    entry_point = 'MyEnv.envs:MyMergeEnvHardReward')
+    
+register(
+    id = 'my-crowded_merge_hard-v0',
+    entry_point = 'MyEnv.envs:MyMergeEnvHardReward')

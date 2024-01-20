@@ -23,7 +23,7 @@ parser.add_argument("-e", "--environment", help="which my- env been used", type=
 parser.add_argument("-t", "--train", help="training or not", type=str, default = "True")
 parser.add_argument("-r", "--render_mode", help="h for human & r for rgb_array", type=str, default = "r")
 args = parser.parse_args()
-ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection", "crowded_highway", "crowded_merge"]
+ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection", "crowded_highway", "crowded_merge", "merge_hard", "crowded_merge_hard"]
 
 if __name__ == "__main__":
     assert args.environment in ENV_LIST, "Wrong my-ENV"
@@ -52,8 +52,8 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.1,
-                    ent_coef=0.01,
+                    target_kl=0.3,
+                    ent_coef=0.,
                     vf_coef=0.8,
                     tensorboard_log=tensorboard_log,
                     use_advantage = True)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         log_name = time_str.get_time() + f"_{args.log_name}"
         start_time = time_str.get_origin_time()
         # Train the agent
-        model.learn(total_timesteps=int(1e3), tb_log_name=log_name)
+        model.learn(total_timesteps=int(2e6), tb_log_name=log_name)
         time_str.set_time_now()
         end_time = time_str.get_origin_time()
         print("log name: ", tensorboard_log + log_name)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             model.save(tensorboard_log + "model")
 
     model = PPO.load(tensorboard_log + "model")
-    env = GrayScale_env
+    env = gym.make(f"my-{args.environment}-v0", render_mode="human")
     while True:
         obs, info = env.reset()
         done = truncated = False

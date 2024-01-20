@@ -26,7 +26,7 @@ class MyCrowdedHighwayEnv(HighwayEnvFast):
             "high_speed_reward": 0.4,
             "merging_speed_reward": -0.5,
             "lane_change_reward": 0,
-            "vehicles_density": 3,
+            "vehicles_density": 2,
             })
         return cfg
         
