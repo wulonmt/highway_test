@@ -38,4 +38,8 @@ register(
     
 register(
     id = 'my-crowded_merge_hard-v0',
-    entry_point = 'MyEnv.envs:MyMergeEnvHardReward')
+    entry_point = 'MyEnv.envs:MyCrowdedMergeEnvHardReward')
+    
+register(
+    id = 'my-highway_hard-v0',
+    entry_point = 'MyEnv.envs:MyHighwayEnvHardReward')

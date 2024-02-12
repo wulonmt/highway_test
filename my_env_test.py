@@ -23,7 +23,7 @@ parser.add_argument("-e", "--environment", help="which my- env been used", type=
 parser.add_argument("-t", "--train", help="training or not", type=str, default = "True")
 parser.add_argument("-r", "--render_mode", help="h for human & r for rgb_array", type=str, default = "r")
 args = parser.parse_args()
-ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection", "crowded_highway", "crowded_merge", "merge_hard", "crowded_merge_hard"]
+ENV_LIST=["merge", "highway", "racetrack", "roundabout", "intersection", "crowded_highway", "crowded_merge", "merge_hard", "crowded_merge_hard", "highway_hard"]
 
 if __name__ == "__main__":
     assert args.environment in ENV_LIST, "Wrong my-ENV"
