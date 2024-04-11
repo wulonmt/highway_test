@@ -23,20 +23,20 @@ class MyHighwayEnvHardReward(HighwayEnvFast):
                        "weights": [0.9, 0.1, 0.5],  # weights for RGB conversion
                        "scaling": 1.75,
                    },
-            "lanes_count": 8,
+            "lanes_count": 2,
             "collision_reward": -1,
             "right_lane_reward": 0.1,
             "high_speed_reward": 0.4,
             "merging_speed_reward": -0.5,
             "lane_change_reward": 0,
             "vehicles_count": 50,
-            "distance": 800,
+            "distance": 1000,
             })
         return cfg
         
     def _reward(self, action: Action) -> float:
         if self.vehicle.position[0] > self.config["distance"]:
-            return 1
+            return 1 / self.steps
         else:
             return 0
             

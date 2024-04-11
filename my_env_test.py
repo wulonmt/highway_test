@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     learning_rate=5e-4,
                     gamma=0.8,
                     verbose=1,
-                    target_kl=0.3,
+                    target_kl=0.1,
                     ent_coef=0.,
                     vf_coef=0.8,
                     tensorboard_log=tensorboard_log,
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         log_name = time_str.get_time() + f"_{args.log_name}"
         start_time = time_str.get_origin_time()
         # Train the agent
-        model.learn(total_timesteps=int(2e6), tb_log_name=log_name)
+        model.learn(total_timesteps=int(5e6), tb_log_name=log_name)
         time_str.set_time_now()
         end_time = time_str.get_origin_time()
         print("log name: ", tensorboard_log + log_name)
